@@ -29,9 +29,9 @@ func init() {
 func initUART() {
 	nrf.UART0.ENABLE = nrf.UART_ENABLE_ENABLE_Enabled
 	nrf.UART0.BAUDRATE = nrf.UART_BAUDRATE_BAUDRATE_Baud9600
-	nrf.UART0.TASKS_STARTTX = 1
 	nrf.UART0.PSELTXD = 24 // pin 6 for NRF52840-DK
 	nrf.UART0.PSELRXD = 25 // pin 6 for NRF52840-DK
+	nrf.UART0.TASKS_STARTTX = 1
 }
 
 func initLFCLK() {
