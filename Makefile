@@ -15,6 +15,11 @@ else ifeq ($(TARGET),pca10040)
 OBJCOPY = arm-none-eabi-objcopy
 TGOFLAGS += -target $(TARGET)
 
+else ifeq ($(TARGET),microbit)
+# BBC:Microbit: nRF51 board
+OBJCOPY = arm-none-eabi-objcopy
+TGOFLAGS += -target $(TARGET)
+
 else ifeq ($(TARGET),bluepill)
 # "blue pill" development board
 # See: https://wiki.stm32duino.com/index.php?title=Blue_Pill
@@ -41,7 +46,10 @@ run-blinky2: build/blinky2
 
 ifeq ($(TARGET),pca10040)
 flash-%: build/%.hex
-	nrfjprog -f nrf52 --sectorerase --program $< --reset
+	/home/ron/bin/nrfjprog/nrfjprog -f nrf52 --sectorerase --program $< --reset
+else ifeq ($(TARGET),microbit)
+flash-%: build/%.hex
+	/home/ron/bin/nrfjprog/nrfjprog -f nrf51 --sectorerase --program $< --reset
 else ifeq ($(TARGET),arduino)
 flash-%: build/%.hex
 	avrdude -c arduino -p atmega328p -P /dev/ttyACM0 -U flash:w:$<
