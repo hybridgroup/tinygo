@@ -1,0 +1,16 @@
+{
+	"inherits": ["cortex-m"],
+	"llvm-target": "armv7m-none-eabi",
+	"build-tags": ["stm32f030f4p6", "stm32f0xx", "stm32"],
+	"cflags": [
+		"--target=armv7m-none-eabi",
+		"-Qunused-arguments"
+	],
+	"ldflags": [
+		"-T", "targets/stm32.ld"
+	],
+	"extra-files": [
+		"src/device/stm32/stm32f030.s"
+	],
+	"flash": "openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c 'program {hex} reset exit'"
+}
