@@ -28,30 +28,20 @@ const (
 )
 
 func (p GPIO) getPort() *stm32.GPIO_Type {
-	// Also enable clock for that GPIO port.
-	// Do this always, as it isn't known whether the clock has already been
-	// enabled.
 	switch p.Pin / 16 {
 	case 0:
-		stm32.RCC.APB2ENR |= stm32.RCC_APB2ENR_IOPAEN
 		return stm32.GPIOA
 	case 1:
-		stm32.RCC.APB2ENR |= stm32.RCC_APB2ENR_IOPBEN
 		return stm32.GPIOB
 	case 2:
-		stm32.RCC.APB2ENR |= stm32.RCC_APB2ENR_IOPCEN
 		return stm32.GPIOC
 	case 3:
-		stm32.RCC.APB2ENR |= stm32.RCC_APB2ENR_IOPDEN
 		return stm32.GPIOD
 	case 4:
-		stm32.RCC.APB2ENR |= stm32.RCC_APB2ENR_IOPEEN
 		return stm32.GPIOE
 	case 5:
-		stm32.RCC.APB2ENR |= stm32.RCC_APB2ENR_IOPFEN
 		return stm32.GPIOF
 	case 6:
-		stm32.RCC.APB2ENR |= stm32.RCC_APB2ENR_IOPGEN
 		return stm32.GPIOG
 	default:
 		panic("machine: unknown port")
