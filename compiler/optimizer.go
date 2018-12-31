@@ -43,12 +43,31 @@ func (c *Compiler) Optimize(optLevel, sizeLevel int, inlinerThreshold uint) erro
 		c.OptimizeStringToBytes()
 		c.OptimizeAllocs()
 		c.LowerInterfaces()
+
+		// After interfaces are lowered, there are many more opportunities for
+		// interprocedural optimizations. To get them to work, function
+		// attributes have to be updated first.
+		goPasses.Run(c.mod)
+
+		// Run TinyGo-specific interprocedural optimizations.
+		c.OptimizeAllocs()
+		c.OptimizeStringToBytes()
 	} else {
 		// Must be run at any optimization level.
 		c.LowerInterfaces()
 	}
 	if err := c.Verify(); err != nil {
 		return errors.New("optimizations caused a verification failure")
+	}
+
+	if sizeLevel >= 2 {
+		// Set the "optsize" attribute to make slightly smaller binaries at the
+		// cost of some performance.
+		kind := llvm.AttributeKindID("optsize")
+		attr := c.ctx.CreateEnumAttribute(kind, 0)
+		for fn := c.mod.FirstFunction(); !fn.IsNil(); fn = llvm.NextFunction(fn) {
+			fn.AddFunctionAttr(attr)
+		}
 	}
 
 	// Run module passes.
