@@ -31,6 +31,7 @@ func init() {
 // Configure the compiler.
 type Config struct {
 	Triple     string   // LLVM target triple, e.g. x86_64-unknown-linux-gnu (empty string means default)
+	CPU        string   // LLVM CPU name, e.g. atmega328p (empty string means default)
 	GC         string   // garbage collection strategy
 	CFlags     []string // cflags to pass to cgo
 	LDFlags    []string // ldflags to pass to cgo
@@ -108,7 +109,7 @@ func NewCompiler(pkgName string, config Config) (*Compiler, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.machine = target.CreateTargetMachine(config.Triple, "", "", llvm.CodeGenLevelDefault, llvm.RelocStatic, llvm.CodeModelDefault)
+	c.machine = target.CreateTargetMachine(config.Triple, config.CPU, "", llvm.CodeGenLevelDefault, llvm.RelocStatic, llvm.CodeModelDefault)
 	c.targetData = c.machine.CreateTargetData()
 
 	c.ctx = llvm.NewContext()
@@ -3114,9 +3115,11 @@ func (c *Compiler) NonConstGlobals() {
 	}
 }
 
-// Replace i64 in an external function with a stack-allocated i64*, to work
+// When -wasm-abi flag set to "js" (default),
+// replace i64 in an external function with a stack-allocated i64*, to work
 // around the lack of 64-bit integers in JavaScript (commonly used together with
 // WebAssembly). Once that's resolved, this pass may be avoided.
+// See also the -wasm-abi= flag
 // https://github.com/WebAssembly/design/issues/1172
 func (c *Compiler) ExternalInt64AsPtr() error {
 	int64Type := c.ctx.Int64Type()
@@ -3220,7 +3223,8 @@ func (c *Compiler) ExternalInt64AsPtr() error {
 			c.builder.SetInsertPointAtEnd(entryBlock)
 			var callParams []llvm.Value
 			if fnType.ReturnType() == int64Type {
-				return errors.New("todo: i64 return value in exported function")
+				return errors.New("not yet implemented: exported function returns i64 with -wasm-abi=js; " +
+					"see https://tinygo.org/compiler-internals/calling-convention/")
 			}
 			for i, origParam := range fn.Params() {
 				paramValue := externalFn.Param(i)
